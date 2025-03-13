@@ -1,115 +1,139 @@
-document.getElementById('searchButton').addEventListener('click', fetchRecommendations);
-//test
+document
+  .getElementById("searchButton")
+  .addEventListener("click", fetchRecommendations);
+document
+  .getElementById("refreshButton")
+  .addEventListener("click", fetchRecommendations); // Add refresh button functionality
+
+let likedMovies = []; // Store liked movies
+
 async function fetchRecommendations() {
-    const query = document.getElementById('searchInput').value;
-    if (!query) {
-        alert('Please enter a search query.');
-        return;
+  const query = document.getElementById("searchInput").value;
+  if (!query) {
+    alert("Please enter a search query.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:3000/recommendations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch recommendations");
     }
 
-    try {
-        const response = await fetch('http://localhost:3000/recommendations', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch recommendations');
-        }
-
-        const data = await response.json();
-        console.log('Data from backend:', data); // Debugging
-
-        displaySearchResults(data.searchResults);
-        displayRecommendations(data.recommendations);
-    } catch (error) {
-        console.error('Error fetching recommendations:', error);
-        alert('Failed to fetch recommendations. Please try again.');
-    }
+    const data = await response.json();
+    displaySearchResults(data.searchResults);
+    displayRecommendations(data.recommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    alert("Failed to fetch recommendations. Please try again.");
+  }
 }
 
-// Function to display search results
 function displaySearchResults(movies) {
-    const searchResultsDiv = document.getElementById('searchResults');
-    searchResultsDiv.innerHTML = ''; // Clear previous search results
+  const searchResultsDiv = document.getElementById("searchResults");
+  searchResultsDiv.innerHTML = "";
 
-    if (movies.length === 0) {
-        searchResultsDiv.innerHTML = '<p>No search results found.</p>';
-        return;
-    }
+  if (movies.length === 0) {
+    searchResultsDiv.innerHTML = "<p>No search results found.</p>";
+    return;
+  }
 
-    movies.forEach(movie => {
-        const block = document.createElement('div');
-        block.className = 'movie-block';
-
-        const img = document.createElement('img');
-        img.src = movie.Poster === 'N/A' ? 'https://via.placeholder.com/150' : movie.Poster; // Handle missing posters
-        img.alt = movie.Title;
-
-        const title = document.createElement('p');
-        title.textContent = movie.Title;
-
-        const likeButton = document.createElement('button');
-        likeButton.textContent = 'Like';
-        likeButton.addEventListener('click', () => likeMovie(movie.imdbID));
-
-        block.appendChild(img);
-        block.appendChild(title);
-        block.appendChild(likeButton);
-        searchResultsDiv.appendChild(block);
-    });
+  movies.forEach((movie) => {
+    const block = createMovieBlock(movie, true);
+    searchResultsDiv.appendChild(block);
+  });
 }
 
-// Function to display recommendations
 function displayRecommendations(movies) {
-    const recommendationsDiv = document.getElementById('recommendations');
-    recommendationsDiv.innerHTML = ''; // Clear previous recommendations
+  const recommendationsDiv = document.getElementById("recommendations");
+  recommendationsDiv.innerHTML = "";
 
-    if (movies.length === 0) {
-        recommendationsDiv.innerHTML = '<p>No recommendations found. Try another search.</p>';
-        return;
-    }
+  if (movies.length === 0) {
+    recommendationsDiv.innerHTML =
+      "<p>No recommendations found. Try another search.</p>";
+    return;
+  }
 
-    movies.forEach(movie => {
-        const block = document.createElement('div');
-        block.className = 'movie-block';
-
-        const img = document.createElement('img');
-        img.src = movie.Poster === 'N/A' ? 'https://via.placeholder.com/150' : movie.Poster; // Handle missing posters
-        img.alt = movie.Title;
-
-        const title = document.createElement('p');
-        title.textContent = movie.Title;
-
-        block.appendChild(img);
-        block.appendChild(title);
-        recommendationsDiv.appendChild(block);
-    });
+  movies.forEach((movie) => {
+    const block = createMovieBlock(movie, false);
+    recommendationsDiv.appendChild(block);
+  });
 }
 
-// Function to like a movie
-async function likeMovie(movieId) {
-    try {
-        const response = await fetch('http://localhost:3000/like', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ movieId }),
-        });
+function createMovieBlock(movie, isSearchResult) {
+  const block = document.createElement("div");
+  block.className = "movie-block";
 
-        if (!response.ok) {
-            throw new Error('Failed to like movie');
-        }
+  const img = document.createElement("img");
+  img.src =
+    movie.Poster === "N/A" ? "https://via.placeholder.com/150" : movie.Poster;
+  img.alt = movie.Title;
 
-        const data = await response.json();
-        console.log('Movie liked:', data); // Debugging
-        alert('Movie liked! Recommendations will update accordingly.');
-    } catch (error) {
-        console.error('Error liking movie:', error);
-        alert('Failed to like movie. Please try again.');
+  const title = document.createElement("p");
+  title.textContent = movie.Title;
+
+  const button = document.createElement("button");
+  button.textContent = isSearchResult ? "Like" : "Remove";
+  button.addEventListener("click", () => {
+    if (isSearchResult) {
+      likeMovie(movie);
+    } else {
+      removeLikedMovie(movie);
     }
+  });
+
+  block.appendChild(img);
+  block.appendChild(title);
+  block.appendChild(button);
+  return block;
+}
+
+async function likeMovie(movie) {
+  try {
+    const response = await fetch("http://localhost:3000/like", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ movieId: movie.imdbID }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to like movie");
+    }
+
+    likedMovies.push(movie);
+    displayLikedMovies();
+    alert("Movie liked! Recommendations will update accordingly.");
+  } catch (error) {
+    console.error("Error liking movie:", error);
+    alert("Failed to like movie. Please try again.");
+  }
+}
+
+function displayLikedMovies() {
+  const likedMoviesDiv = document.getElementById("likedMovies");
+  likedMoviesDiv.innerHTML = "";
+
+  if (likedMovies.length === 0) {
+    likedMoviesDiv.innerHTML = "<p>No liked movies yet.</p>";
+    return;
+  }
+
+  likedMovies.forEach((movie) => {
+    const block = createMovieBlock(movie, false);
+    likedMoviesDiv.appendChild(block);
+  });
+}
+
+function removeLikedMovie(movie) {
+  likedMovies = likedMovies.filter((m) => m.imdbID !== movie.imdbID);
+  displayLikedMovies();
 }
