@@ -1,5 +1,5 @@
 document.getElementById('searchButton').addEventListener('click', fetchRecommendations);
-
+//test
 async function fetchRecommendations() {
     const query = document.getElementById('searchInput').value;
     if (!query) {
