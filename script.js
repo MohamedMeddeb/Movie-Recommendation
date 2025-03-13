@@ -1,21 +1,25 @@
 document
   .getElementById("searchButton")
-  .addEventListener("click", fetchRecommendations);
+  .addEventListener("click", fetchSearchResults);
 document
   .getElementById("refreshButton")
-  .addEventListener("click", fetchRecommendations); // Add refresh button functionality
+  .addEventListener("click", fetchRecommendations);
 
 let likedMovies = []; // Store liked movies
 
-async function fetchRecommendations() {
+// Fetch search results
+async function fetchSearchResults() {
   const query = document.getElementById("searchInput").value;
   if (!query) {
     alert("Please enter a search query.");
     return;
   }
 
+  // Clear previous search results
+  document.getElementById("searchResults").innerHTML = "";
+
   try {
-    const response = await fetch("http://localhost:3000/recommendations", {
+    const response = await fetch("http://localhost:3000/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,11 +28,33 @@ async function fetchRecommendations() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch recommendations");
+      throw new Error("Failed to fetch search results");
     }
 
     const data = await response.json();
     displaySearchResults(data.searchResults);
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    alert("Failed to fetch search results. Please try again.");
+  }
+}
+
+// Fetch recommendations
+async function fetchRecommendations() {
+  try {
+    const response = await fetch("http://localhost:3000/recommendations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ likedMovies }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch recommendations");
+    }
+
+    const data = await response.json();
     displayRecommendations(data.recommendations);
   } catch (error) {
     console.error("Error fetching recommendations:", error);
@@ -36,6 +62,7 @@ async function fetchRecommendations() {
   }
 }
 
+// Display search results
 function displaySearchResults(movies) {
   const searchResultsDiv = document.getElementById("searchResults");
   searchResultsDiv.innerHTML = "";
@@ -51,6 +78,7 @@ function displaySearchResults(movies) {
   });
 }
 
+// Display recommendations
 function displayRecommendations(movies) {
   const recommendationsDiv = document.getElementById("recommendations");
   recommendationsDiv.innerHTML = "";
@@ -67,6 +95,7 @@ function displayRecommendations(movies) {
   });
 }
 
+// Create a movie block
 function createMovieBlock(movie, isSearchResult) {
   const block = document.createElement("div");
   block.className = "movie-block";
@@ -83,9 +112,9 @@ function createMovieBlock(movie, isSearchResult) {
   button.textContent = isSearchResult ? "Like" : "Remove";
   button.addEventListener("click", () => {
     if (isSearchResult) {
-      likeMovie(movie);
+      likeMovie(movie); // Like the movie if it's in search results
     } else {
-      removeLikedMovie(movie);
+      removeLikedMovie(movie); // Remove the movie if it's in liked movies
     }
   });
 
@@ -95,6 +124,7 @@ function createMovieBlock(movie, isSearchResult) {
   return block;
 }
 
+// Like a movie
 async function likeMovie(movie) {
   try {
     const response = await fetch("http://localhost:3000/like", {
@@ -109,31 +139,57 @@ async function likeMovie(movie) {
       throw new Error("Failed to like movie");
     }
 
-    likedMovies.push(movie);
-    displayLikedMovies();
-    alert("Movie liked! Recommendations will update accordingly.");
+    likedMovies.push(movie); // Add the movie to the likedMovies array
+    displayLikedMovies(); // Update the UI to show the liked movies
+    fetchRecommendations(); // Update recommendations after liking a movie
   } catch (error) {
     console.error("Error liking movie:", error);
     alert("Failed to like movie. Please try again.");
   }
 }
 
+// Remove a liked movie
+async function removeLikedMovie(movie) {
+  try {
+    const response = await fetch("http://localhost:3000/unlike", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ movieId: movie.imdbID }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to remove liked movie");
+    }
+
+    // Remove the movie from the likedMovies array
+    likedMovies = likedMovies.filter((m) => m.imdbID !== movie.imdbID);
+
+    // Update the UI
+    displayLikedMovies();
+
+    // Fetch new recommendations after removing a movie
+    fetchRecommendations();
+  } catch (error) {
+    console.error("Error removing liked movie:", error);
+    alert("Failed to remove liked movie. Please try again.");
+  }
+}
+
+// Display liked movies
 function displayLikedMovies() {
   const likedMoviesDiv = document.getElementById("likedMovies");
-  likedMoviesDiv.innerHTML = "";
+  likedMoviesDiv.innerHTML = ""; // Clear the current content
 
   if (likedMovies.length === 0) {
     likedMoviesDiv.innerHTML = "<p>No liked movies yet.</p>";
     return;
   }
 
+  // Display each liked movie
   likedMovies.forEach((movie) => {
-    const block = createMovieBlock(movie, false);
-    likedMoviesDiv.appendChild(block);
+    const block = createMovieBlock(movie, false); // Create a movie block
+    likedMoviesDiv.appendChild(block); // Add the block to the liked movies section
   });
-}
-
-function removeLikedMovie(movie) {
-  likedMovies = likedMovies.filter((m) => m.imdbID !== movie.imdbID);
-  displayLikedMovies();
 }
