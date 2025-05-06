@@ -233,6 +233,63 @@ body {
   color: var(--secondary);
 }
 
+/* Selected movie section */
+.selected-movie-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  display: none;
+}
+
+.selected-movie-card {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.selected-movie-poster {
+  width: 100px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.no-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--gray);
+  font-size: 2rem;
+}
+
+.selected-movie-info {
+  flex: 1;
+}
+
+.selected-movie-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.selected-movie-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.selected-movie-overview {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
 /* Vertical recommendations layout */
 #recommendations {
   display: flex;
@@ -380,11 +437,18 @@ footer p {
     padding: 0 1.5rem;
   }
 
-  .movie-card {
+  .movie-card,
+  .selected-movie-card {
     flex-direction: column;
   }
 
   .movie-poster {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2/3;
+  }
+
+  .selected-movie-poster {
     width: 100%;
     height: auto;
     aspect-ratio: 2/3;

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const movieInput = document.getElementById("movieInput");
   const searchButton = document.getElementById("searchButton");
   const searchIcon = document.querySelector(".search-icon");
+  const selectedMovieSection = document.getElementById("selectedMovieSection");
 
   // Event listeners
   movieInput.addEventListener("input", debounce(searchMovie, 300));
@@ -81,7 +82,70 @@ document.addEventListener("DOMContentLoaded", function () {
     movieInput.value = movieTitle;
     searchResultsEl.innerHTML = "";
     searchResultsEl.style.display = "none";
-    await getRecommendations(movieId);
+
+    // Show loading while we fetch the selected movie details
+    loadingDiv.style.display = "block";
+    recommendationsDiv.innerHTML = "";
+    selectedMovieSection.style.display = "none";
+
+    try {
+      // Fetch the selected movie details
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`
+      );
+      const movie = await response.json();
+
+      // Display the selected movie
+      selectedMovieSection.style.display = "block";
+      selectedMovieSection.innerHTML = `
+        <h2 class="section-title">
+          <i class="fas fa-check-circle"></i> Your Movie
+        </h2>
+        <div class="selected-movie-card">
+          ${
+            movie.poster_path
+              ? `<img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
+                   class="selected-movie-poster" 
+                   alt="${escapeHtml(movie.title)}">`
+              : '<div class="selected-movie-poster no-poster"><i class="fas fa-film"></i></div>'
+          }
+          <div class="selected-movie-info">
+            <h3 class="selected-movie-title">${escapeHtml(movie.title)}</h3>
+            <div class="selected-movie-meta">
+              <span>${
+                movie.release_date ? movie.release_date.split("-")[0] : "N/A"
+              }</span>
+              <span>•</span>
+              <span><i class="fas fa-star"></i> ${
+                movie.vote_average?.toFixed(1) || "N/A"
+              }</span>
+              ${
+                movie.runtime
+                  ? `<span>•</span>
+                     <span><i class="far fa-clock"></i> ${Math.floor(
+                       movie.runtime / 60
+                     )}h ${movie.runtime % 60}m</span>`
+                  : ""
+              }
+            </div>
+            ${
+              movie.overview
+                ? `<p class="selected-movie-overview">${movie.overview}</p>`
+                : '<p class="selected-movie-overview">No overview available.</p>'
+            }
+          </div>
+        </div>
+      `;
+
+      // Now get recommendations
+      await getRecommendations(movieId);
+    } catch (error) {
+      console.error("Error fetching selected movie:", error);
+      // Still try to get recommendations even if selected movie details fail
+      await getRecommendations(movieId);
+    } finally {
+      loadingDiv.style.display = "none";
+    }
   };
 
   // Get recommendations
@@ -201,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadingDiv.style.display = "block";
     recommendationsDiv.innerHTML = "";
+    selectedMovieSection.style.display = "none";
 
     try {
       const response = await fetch(
@@ -212,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (data.results?.length > 0) {
         const movie = data.results[0];
-        await getRecommendations(movie.id);
+        await selectMovie(movie.id, movie.title);
       } else {
         recommendationsDiv.innerHTML =
           "<p>Movie not found. Please try another title.</p>";
