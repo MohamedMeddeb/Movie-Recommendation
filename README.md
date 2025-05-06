@@ -3,8 +3,11 @@ CineMatch AI
 
 ✨ Features
 🔍 Smart Search - Find movies instantly
+
 ❤️ Perfect Matches - Get 10 tailored recommendations
+
 📱 Works Everywhere - Beautiful on all devices
+
 🕒 Fast Results - Recommendations in seconds
 
 🎥 How to Use
