@@ -1,22 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Movie Recommender AI</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>🎥 Movie Recommender AI</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch AI - Smart Movie Recommendations</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="floating-header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <i class="fas fa-film"></i>
+            <h1><a href="movies.html">CineMatch AI</a></h1>
+          </div>
+          <div class="search-container">
+            <div class="search-box">
+              <input
+                type="text"
+                id="movieInput"
+                class="search-input"
+                placeholder="Search for a movie you love..."
+                autocomplete="off"
+              />
+              <i class="fas fa-search search-icon"></i>
+              <ul id="searchResults"></ul>
+            </div>
+            <button class="btn" id="searchButton">
+              <i class="fas fa-robot"></i> Get Matches
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
 
-    <input type="text" id="movieInput" placeholder="Search for a movie..." oninput="searchMovie()" autocomplete="off" />
-    <ul id="searchResults"></ul>
+    <div class="container main-content">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Analyzing your taste...</p>
+      </div>
 
-    <!-- Restore the button -->
-    <button onclick="manualSearch()">Get Recommendations</button>
+      <section class="recommendations-section">
+        <h2 class="section-title">
+          <i class="fas fa-heart"></i> Your Perfect Matches
+        </h2>
+        <div id="recommendations">
+          <!-- Recommendations will appear here -->
+        </div>
+      </section>
+    </div>
 
-    <div id="recommendations"></div>
-  </div>
-  <script src="script.js"></script>
-</body>
+    <footer>
+      <div class="container">
+        <p>
+          © 2023 CineMatch AI | Powered by advanced recommendation algorithms
+        </p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
 </html>
