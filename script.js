@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const TMDB_API_KEY = "b89e2f5f4034e007b2c262dca71b61e5";
+  const TMDB_API_KEY = "Your-API-Key"; //Place Your API Here
   const searchResultsEl = document.getElementById("searchResults");
   const recommendationsDiv = document.getElementById("recommendations");
   const loadingDiv = document.getElementById("loading");
